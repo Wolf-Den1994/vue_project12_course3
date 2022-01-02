@@ -1,13 +1,13 @@
 <template>
   <div class="card">
-    <h2>Название задачи</h2>
-    <p><strong>Статус</strong>: <AppStatus :type="'done'" /></p>
-    <p><strong>Дэдлайн</strong>: {{ new Date().toLocaleDateString() }}</p>
-    <p><strong>Описание</strong>: Описание задачи</p>
+    <h2>{{ task.name }}</h2>
+    <p><strong>Статус</strong>: <AppStatus :type="task.status" :status="task.status" /></p>
+    <p><strong>Дэдлайн</strong>: {{ task.date }}</p>
+    <p><strong>Описание</strong>: {{ task.disc }}</p>
     <div>
-      <button class="btn">Взять в работу</button>
-      <button class="btn primary">Завершить</button>
-      <button class="btn danger">Отменить</button>
+      <button class="btn" @click="() => changeStatus('pending')">Взять в работу</button>
+      <button class="btn primary" @click="() => changeStatus('done')">Завершить</button>
+      <button class="btn danger" @click="() => changeStatus('cancelled')">Отменить</button>
     </div>
   </div>
   <h3 class="text-white center">
@@ -16,9 +16,29 @@
 </template>
 
 <script>
+import {useRouter, useRoute} from "vue-router";
+import {useStore} from "vuex";
 import AppStatus from '../components/AppStatus'
 
 export default {
+  setup() {
+    const router = useRouter();
+    const route = useRoute();
+    const store = useStore();
+
+    const tasks = store.getters.getTasks;
+    const task = tasks.find((task) => task.id === route.path.split('/')[2])
+
+    const changeStatus = (newStatus) => {
+      store.commit('changeStatusVuex', {task, newStatus})
+      router.push('/')
+    }
+
+    return {
+      task,
+      changeStatus
+    }
+  },
   components: {AppStatus}
 }
 </script>
